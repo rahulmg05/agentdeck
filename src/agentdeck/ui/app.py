@@ -509,12 +509,7 @@ class AgentDeckApp(App):
     def _refresh_session_stats_panel(self) -> None:
         panel = self.query_one("#session-stats-panel", SessionStatsPanel)
         info = self.registry.get(self.selected_session_id) if self.selected_session_id else None
-        series = (
-            self.registry.tokens_per_minute_series(self.selected_session_id, time.time())
-            if self.selected_session_id
-            else []
-        )
-        panel.update_for(info, series)
+        panel.update_for(info)
 
     # ---- focused mode --------------------------------------------------
 

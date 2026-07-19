@@ -1,5 +1,5 @@
 """Phase 5 tests: transcript polling wired into the live app, cost shown in
-the stats bar, and the per-session stats panel (tokens/cost/sparkline)."""
+the stats bar, and the per-session stats panel (tokens/cost)."""
 
 import json
 from pathlib import Path
