@@ -25,10 +25,13 @@ nothing is ever lost.
 ## Quickstart
 
 ```bash
-pipx install agentdeck     # or: pip install agentdeck
+pipx install agentdcli     # or: pip install agentdcli
 agentdeck install          # registers the recorder as a Claude Code hook
 agentdeck                  # launch the live cockpit
 ```
+
+(The PyPI package is named `agentdcli` — plain `agentdeck` was already taken —
+but the installed command is `agentdeck`, same as everywhere else in this doc.)
 
 That's it — `agentdeck install` is idempotent and additive (it merges into
 `~/.claude/settings.json`, backing the file up first, and never touches
@@ -121,8 +124,16 @@ the console — edit it directly.
 ## Publishing to PyPI
 
 This is for maintainers cutting a release, not for end users (who just run
-`pip install agentdeck`). The package builds with `hatchling`, driven by
+`pip install agentdcli`). The package builds with `hatchling`, driven by
 `pyproject.toml`, and ships via [uv](https://docs.astral.sh/uv/).
+
+Note: the PyPI *distribution* name is `agentdcli` (plain `agentdeck` was
+rejected by PyPI's anti-typosquat check as "too similar to an existing
+project" — `agent-deck`/`agent_deck` are already taken, and PyPI treats
+those as colliding with the unhyphenated form). The installed *command*,
+the Python package you `import`, and everything else in this repo are
+still named `agentdeck` — only `pyproject.toml`'s `[project] name` and the
+`pip install`/`pipx install` invocations below use `agentdcli`.
 
 1. **Bump the version** in `pyproject.toml` (`[project] version = "..."`,
    [SemVer](https://semver.org/)) and commit it.
@@ -167,7 +178,7 @@ This is for maintainers cutting a release, not for end users (who just run
 
    ```bash
    uv publish --index testpypi --token <your-testpypi-token>
-   pip install --index-url https://test.pypi.org/simple/ agentdeck
+   pip install --index-url https://test.pypi.org/simple/ agentdcli
    ```
 
    `testpypi` needs a matching `[[tool.uv.index]]` entry in
@@ -181,7 +192,7 @@ This is for maintainers cutting a release, not for end users (who just run
    ```
 
    Generate the token from [pypi.org](https://pypi.org) → Account settings
-   → API tokens (scope it to the `agentdeck` project once the first
+   → API tokens (scope it to the `agentdcli` project once the first
    release exists). Set it as `UV_PUBLISH_TOKEN` in the environment to
    avoid passing it on the command line, or store it in
    `~/.config/uv/uv.toml`.
@@ -196,10 +207,12 @@ This is for maintainers cutting a release, not for end users (who just run
 Once published, anyone can install it with any of:
 
 ```bash
-pipx install agentdeck      # isolated, recommended for a CLI tool
-uv tool install agentdeck   # uv's equivalent of pipx
-pip install agentdeck       # into whatever environment is active
+pipx install agentdcli      # isolated, recommended for a CLI tool
+uv tool install agentdcli   # uv's equivalent of pipx
+pip install agentdcli       # into whatever environment is active
 ```
+
+Each of these gives you the `agentdeck` command, same as always.
 
 **Automating this**: if you'd rather not run `uv publish` by hand each
 time, PyPI supports [Trusted Publishing](https://docs.pypi.org/trusted-publishers/)
@@ -207,3 +220,8 @@ via GitHub Actions (OIDC, no stored token) — add a `release.yml` workflow
 triggered on tag push that runs `uv build` then `uv publish`, and register
 the repo as a trusted publisher in the PyPI project settings. Not set up
 in this repo yet.
+
+## License
+
+[MIT](LICENSE) — free to use, modify, and distribute, including
+commercially. Contributions are welcome via issues and pull requests.

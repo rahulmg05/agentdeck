@@ -1,5 +1,5 @@
 [project]
-name = "agentdeck"
+name = "agentdcli"
 version = "0.1.0"
 description = "A flight recorder + live cockpit TUI for Claude Code sessions."
 readme = "README.md"
