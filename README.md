@@ -1,10 +1,15 @@
 # AgentDeck
 
-A flight recorder + live cockpit TUI for Claude Code sessions.
+Agentdeck is a recorder that silently captures and durably logs every
+lifecycle event, prompt, and tool call from your agentic coding sessions.
+It features a rich terminal UI that provides a live view of your active
+sessions, complete with real-time tool durations, token tracking, and the
+ability to replay historical interactions.
 
-Claude Code's activity — prompts, tool calls, file edits, subagents, token
-spend — normally only exists as scrolling chat text, gone the moment the
-terminal closes. AgentDeck fixes that. It's two cooperating pieces:
+As off today it supports, Claude Code's activity — prompts, tool calls,
+file edits, subagents, token spend — normally only exists as scrolling
+chat text, gone the moment the terminal closes. AgentDeck fixes that.
+It's two cooperating pieces:
 
 - **Recorder** — a tiny stdlib-only hook script that Claude Code calls on
   every lifecycle event (prompt submitted, tool about to run, tool
@@ -40,23 +45,23 @@ is actually working.
 
 ## Usage
 
-| Command | What it does |
-|---|---|
-| `agentdeck` | Launch the live cockpit (default: focused mode) |
-| `agentdeck install` / `uninstall` | Register / remove the recorder hook |
-| `agentdeck doctor` | Check that recording is healthy |
-| `agentdeck replay --session <id>` | Replay a past session |
-| `agentdeck replay` | Browse past sessions, then replay one |
-| `agentdeck export <session>` | Export a session to a self-contained HTML timeline |
+| Command                           | What it does                                       |
+| --------------------------------- | -------------------------------------------------- |
+| `agentdeck`                       | Launch the live cockpit (default: focused mode)    |
+| `agentdeck install` / `uninstall` | Register / remove the recorder hook                |
+| `agentdeck doctor`                | Check that recording is healthy                    |
+| `agentdeck replay --session <id>` | Replay a past session                              |
+| `agentdeck replay`                | Browse past sessions, then replay one              |
+| `agentdeck export <session>`      | Export a session to a self-contained HTML timeline |
 
 ### View modes
 
-| Mode | What you see |
-|---|---|
+| Mode                  | What you see                                                                                                                                                                      |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Focused** (default) | Sidebar of all sessions (name, liveness, tool/fail counts) on the left; the selected session's full timeline in the middle; a stats bar (tokens, cost, tokens/min) at the bottom. |
-| **Firehose** | Every session's events interleaved into one chronological, color-coded scrolling log — the fastest way to watch everything happening on the machine at once. |
-| **Wall** | A tiled grid, one pane per live session (up to 4, with a "+N more" strip beyond that) — good for keeping an eye on several sessions at a glance. |
-| **Replay** | The same UI fed from a past session's log instead of live data, with speed control and seeking — watch any session like game film. |
+| **Firehose**          | Every session's events interleaved into one chronological, color-coded scrolling log — the fastest way to watch everything happening on the machine at once.                      |
+| **Wall**              | A tiled grid, one pane per live session (up to 4, with a "+N more" strip beyond that) — good for keeping an eye on several sessions at a glance.                                  |
+| **Replay**            | The same UI fed from a past session's log instead of live data, with speed control and seeking — watch any session like game film.                                                |
 
 ### Other things you can do
 
@@ -73,24 +78,24 @@ is actually working.
 
 ### Keybindings
 
-| Key | Action |
-|---|---|
-| `s` / `f` / `w` | Switch mode: focused / firehose / wall |
-| `tab` | Cycle the selected session (focused mode) |
-| `g` | Toggle focus-follow (auto-jump to the most recently active session) |
-| `enter` | Open the detail view for the selected row (focused mode) |
-| `t` | Open the chat transcript for the selected session |
-| `/` | Search the current view |
-| `e` | Errors-only filter |
-| `d` | Toggle dark/light theme |
-| `ctrl+k` | Command palette (jump to session, filter by event type, full theme picker, ...) |
-| `p` | Pause/resume the live view |
-| `1`-`9` / `0` | Filter the firehose to one session / clear the filter |
-| `end` | Resume auto-scroll after scrolling up |
-| `space` | Pause/resume replay (replay mode only) |
-| `←` / `→` | Seek back/forward (replay mode only) |
-| `]` / `[` | Replay speed up/down: 1x → 5x → 20x → max |
-| `q` | Quit |
+| Key             | Action                                                                          |
+| --------------- | ------------------------------------------------------------------------------- |
+| `s` / `f` / `w` | Switch mode: focused / firehose / wall                                          |
+| `tab`           | Cycle the selected session (focused mode)                                       |
+| `g`             | Toggle focus-follow (auto-jump to the most recently active session)             |
+| `enter`         | Open the detail view for the selected row (focused mode)                        |
+| `t`             | Open the chat transcript for the selected session                               |
+| `/`             | Search the current view                                                         |
+| `e`             | Errors-only filter                                                              |
+| `d`             | Toggle dark/light theme                                                         |
+| `ctrl+k`        | Command palette (jump to session, filter by event type, full theme picker, ...) |
+| `p`             | Pause/resume the live view                                                      |
+| `1`-`9` / `0`   | Filter the firehose to one session / clear the filter                           |
+| `end`           | Resume auto-scroll after scrolling up                                           |
+| `space`         | Pause/resume replay (replay mode only)                                          |
+| `←` / `→`       | Seek back/forward (replay mode only)                                            |
+| `]` / `[`       | Replay speed up/down: 1x → 5x → 20x → max                                       |
+| `q`             | Quit                                                                            |
 
 ## How it works
 
@@ -127,10 +132,10 @@ This is for maintainers cutting a release, not for end users (who just run
 `pip install agentdcli`). The package builds with `hatchling`, driven by
 `pyproject.toml`, and ships via [uv](https://docs.astral.sh/uv/).
 
-Note: the PyPI *distribution* name is `agentdcli` (plain `agentdeck` was
+Note: the PyPI _distribution_ name is `agentdcli` (plain `agentdeck` was
 rejected by PyPI's anti-typosquat check as "too similar to an existing
 project" — `agent-deck`/`agent_deck` are already taken, and PyPI treats
-those as colliding with the unhyphenated form). The installed *command*,
+those as colliding with the unhyphenated form). The installed _command_,
 the Python package you `import`, and everything else in this repo are
 still named `agentdeck` — only `pyproject.toml`'s `[project] name` and the
 `pip install`/`pipx install` invocations below use `agentdcli`.

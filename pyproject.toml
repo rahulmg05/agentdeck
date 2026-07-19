@@ -1,7 +1,7 @@
 [project]
 name = "agentdcli"
 version = "0.1.0"
-description = "A flight recorder + live cockpit TUI for Claude Code sessions."
+description = "Agentdeck is a recorder that silently captures and durably logs every lifecycle event, prompt, and tool call from your agentic coding sessions."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
