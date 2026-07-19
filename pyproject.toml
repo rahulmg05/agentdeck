@@ -1,5 +1,5 @@
 [project]
-name = "blackbox-cc"
+name = "agentdeck"
 version = "0.1.0"
 description = "A flight recorder + live cockpit TUI for Claude Code sessions."
 readme = "README.md"
@@ -11,24 +11,24 @@ dependencies = [
 ]
 
 [project.scripts]
-blackbox = "blackbox.__main__:main"
+agentdeck = "agentdeck.__main__:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/blackbox"]
+packages = ["src/agentdeck"]
 
-# courier/emit.py lives at the repo root, outside src/blackbox, so it never
+# courier/emit.py lives at the repo root, outside src/agentdeck, so it never
 # gets picked up by `packages` above — without this it silently vanishes
 # from the installed package (see installer._courier_path()'s dev/packaged
 # fallback, which needs a copy at this path once actually pip-installed).
 [tool.hatch.build.targets.wheel.force-include]
-"courier/emit.py" = "blackbox/courier/emit.py"
+"courier/emit.py" = "agentdeck/courier/emit.py"
 
 [tool.hatch.build.targets.sdist]
-include = ["src/blackbox", "courier", "README.md", "LICENSE"]
+include = ["src/agentdeck", "courier", "README.md", "LICENSE"]
 
 [dependency-groups]
 dev = [

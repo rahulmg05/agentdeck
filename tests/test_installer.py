@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from blackbox import installer
+from agentdeck import installer
 
 
 def _settings(tmp_path, monkeypatch):
@@ -11,7 +11,7 @@ def _settings(tmp_path, monkeypatch):
 
 
 def test_courier_path_falls_back_to_packaged_copy_when_no_dev_checkout(monkeypatch, tmp_path):
-    """Regression test: courier/emit.py lives outside src/blackbox, so a
+    """Regression test: courier/emit.py lives outside src/agentdeck, so a
     real pip/pipx install (no dev checkout on disk) has to resolve it via
     the copy bundled into the package (pyproject.toml's wheel
     force-include), not the source-tree-relative path. Caught by an actual
@@ -26,8 +26,8 @@ def test_courier_path_falls_back_to_packaged_copy_when_no_dev_checkout(monkeypat
     monkeypatch.setattr(Path, "exists", fake_exists)
 
     resolved = installer._courier_path()
-    assert str(resolved).endswith("blackbox/courier/emit.py") or str(resolved).endswith(
-        "blackbox\\courier\\emit.py"
+    assert str(resolved).endswith("agentdeck/courier/emit.py") or str(resolved).endswith(
+        "agentdeck\\courier\\emit.py"
     )
 
 
@@ -92,7 +92,7 @@ def test_install_backs_up_existing_settings(tmp_path, monkeypatch):
 
     installer.install()
 
-    backups = list(tmp_path.glob("settings.json.bb-backup-*"))
+    backups = list(tmp_path.glob("settings.json.ad-backup-*"))
     assert len(backups) == 1
     assert json.loads(backups[0].read_text()) == {"theme": "dark"}
 

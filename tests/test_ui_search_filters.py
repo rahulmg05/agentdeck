@@ -7,17 +7,17 @@ from pathlib import Path
 import pytest
 from textual.widgets import RichLog
 
-from blackbox.ui.app import BlackboxApp
-from blackbox.ui.widgets.focused_timeline import FocusedTimeline
+from agentdeck.ui.app import AgentDeckApp
+from agentdeck.ui.widgets.focused_timeline import FocusedTimeline
 
 
 def write_event(path: Path, session_id: str, hook_event_name: str, ts: float, **extra) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     envelope = {
-        "bb_schema": 1,
-        "bb_ts": ts,
-        "bb_seq": 0,
-        "bb_host_pid": 1,
+        "ad_schema": 1,
+        "ad_ts": ts,
+        "ad_seq": 0,
+        "ad_host_pid": 1,
         "event": {"session_id": session_id, "hook_event_name": hook_event_name, **extra},
     }
     with open(path, "a") as f:
@@ -37,7 +37,7 @@ def make_mixed_session(tmp_path: Path) -> Path:
 @pytest.mark.asyncio
 async def test_errors_only_filter_hides_non_failure_events(tmp_path):
     make_mixed_session(tmp_path)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -56,7 +56,7 @@ async def test_errors_only_filter_hides_non_failure_events(tmp_path):
 @pytest.mark.asyncio
 async def test_event_type_filter_via_command_palette_helper(tmp_path):
     make_mixed_session(tmp_path)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -72,7 +72,7 @@ async def test_event_type_filter_via_command_palette_helper(tmp_path):
 @pytest.mark.asyncio
 async def test_search_matches_tool_input_content(tmp_path):
     make_mixed_session(tmp_path)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -87,7 +87,7 @@ async def test_search_matches_tool_input_content(tmp_path):
 @pytest.mark.asyncio
 async def test_search_is_case_insensitive(tmp_path):
     make_mixed_session(tmp_path)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -102,7 +102,7 @@ async def test_search_is_case_insensitive(tmp_path):
 @pytest.mark.asyncio
 async def test_filters_do_not_affect_underlying_bookkeeping(tmp_path):
     make_mixed_session(tmp_path)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("e")
         await pilot.pause()
@@ -116,7 +116,7 @@ async def test_filters_do_not_affect_underlying_bookkeeping(tmp_path):
 @pytest.mark.asyncio
 async def test_filters_apply_to_focused_timeline_too(tmp_path):
     make_mixed_session(tmp_path)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("e")
         await pilot.pause()
@@ -127,7 +127,7 @@ async def test_filters_apply_to_focused_timeline_too(tmp_path):
 @pytest.mark.asyncio
 async def test_command_palette_includes_mode_and_session_commands(tmp_path):
     make_mixed_session(tmp_path)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test():
         commands = list(app.get_system_commands(app.screen))
         titles = [c.title for c in commands]
@@ -143,7 +143,7 @@ async def test_jump_to_session_command_selects_and_switches_to_focused(tmp_path)
     write_event(tmp_path / "sess-a" / "main.jsonl", "sess-a", "SessionStart", 100.0)
     write_event(tmp_path / "sess-b" / "main.jsonl", "sess-b", "SessionStart", 101.0)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("w")
         assert app.mode == "wall"

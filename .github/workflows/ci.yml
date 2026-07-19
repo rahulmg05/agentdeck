@@ -46,6 +46,6 @@ jobs:
           wheel = glob.glob('dist/*.whl')[0]
           with zipfile.ZipFile(wheel) as z:
               names = z.namelist()
-          assert 'blackbox/courier/emit.py' in names, 'courier/emit.py missing from wheel!'
+          assert 'agentdeck/courier/emit.py' in names, 'courier/emit.py missing from wheel!'
           print('OK:', wheel)
           "

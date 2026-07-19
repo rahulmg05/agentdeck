@@ -9,17 +9,17 @@ from pathlib import Path
 import pytest
 from textual.widgets import RichLog
 
-from blackbox.ui.app import BlackboxApp
-from blackbox.ui.widgets.focused_timeline import FocusedTimeline
+from agentdeck.ui.app import AgentDeckApp
+from agentdeck.ui.widgets.focused_timeline import FocusedTimeline
 
 
 def write_event(path: Path, session_id: str, hook_event_name: str, ts: float, **extra) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     envelope = {
-        "bb_schema": 1,
-        "bb_ts": ts,
-        "bb_seq": 0,
-        "bb_host_pid": 1,
+        "ad_schema": 1,
+        "ad_ts": ts,
+        "ad_seq": 0,
+        "ad_host_pid": 1,
         "event": {"session_id": session_id, "hook_event_name": hook_event_name, **extra},
     }
     with open(path, "a") as f:
@@ -36,7 +36,7 @@ async def test_firehose_bulk_load_shows_newest_at_top(tmp_path):
     for i in range(5):
         write_event(session_dir / "main.jsonl", "sess-1", "PreToolUse", 100.0 + i, tool_name=f"Tool{i}")
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -51,7 +51,7 @@ async def test_firehose_live_event_inserted_at_top(tmp_path):
     session_dir = tmp_path / "sess-1"
     write_event(session_dir / "main.jsonl", "sess-1", "PreToolUse", 100.0, tool_name="First")
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -70,7 +70,7 @@ async def test_firehose_stays_anchored_to_top_across_several_live_events(tmp_pat
     session_dir = tmp_path / "sess-1"
     write_event(session_dir / "main.jsonl", "sess-1", "PreToolUse", 100.0, tool_name="E0")
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -92,7 +92,7 @@ async def test_focused_timeline_bulk_load_shows_newest_at_top(tmp_path):
     for i in range(5):
         write_event(session_dir / "main.jsonl", "sess-1", "PreToolUse", 100.0 + i, tool_name=f"Tool{i}", tool_use_id=f"t{i}")
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test():
         table = app.query_one("#focused-timeline", FocusedTimeline)
         top_row = table.get_row_at(0)
@@ -106,7 +106,7 @@ async def test_focused_timeline_live_event_inserted_at_top(tmp_path):
     session_dir = tmp_path / "sess-1"
     write_event(session_dir / "main.jsonl", "sess-1", "PreToolUse", 100.0, tool_name="First", tool_use_id="t0")
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         write_event(session_dir / "main.jsonl", "sess-1", "PreToolUse", 101.0, tool_name="Second", tool_use_id="t1")
         await asyncio.sleep(0.6)
@@ -123,7 +123,7 @@ async def test_wall_pane_bulk_load_shows_newest_at_top(tmp_path):
     for i in range(4):
         write_event(session_dir / "main.jsonl", "sess-1", "PreToolUse", 100.0 + i, tool_name=f"Tool{i}")
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("w")
         await pilot.pause()
@@ -138,7 +138,7 @@ async def test_wall_pane_live_event_inserted_at_top(tmp_path):
     session_dir = tmp_path / "sess-1"
     write_event(session_dir / "main.jsonl", "sess-1", "PreToolUse", 100.0, tool_name="First")
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("w")
         await pilot.pause()
@@ -154,19 +154,19 @@ async def test_wall_pane_live_event_inserted_at_top(tmp_path):
 
 @pytest.mark.asyncio
 async def test_replay_seek_preserves_newest_first_order(tmp_path):
-    from blackbox.events import parse_line
+    from agentdeck.events import parse_line
 
     events = []
     for i in range(10):
         line = json.dumps(
             {
-                "bb_schema": 1, "bb_ts": 100.0 + i, "bb_seq": 0, "bb_host_pid": 1,
+                "ad_schema": 1, "ad_ts": 100.0 + i, "ad_seq": 0, "ad_host_pid": 1,
                 "event": {"session_id": "s", "hook_event_name": "PreToolUse", "tool_name": f"T{i}", "tool_use_id": f"t{i}"},
             }
         )
         events.append(parse_line(line, Path("s/main.jsonl")))
 
-    app = BlackboxApp(replay_events=events)
+    app = AgentDeckApp(replay_events=events)
     async with app.run_test() as pilot:
         await pilot.press("space")  # pause immediately
         await asyncio.sleep(0.1)

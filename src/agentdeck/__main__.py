@@ -1,13 +1,16 @@
-"""CLI entry point: blackbox run | install | uninstall | doctor | replay | export"""
+"""CLI entry point: agentdeck run | install | uninstall | doctor | replay | export"""
 
 import argparse
 import sys
 
-from blackbox import __version__
+from agentdeck import __version__
+from agentdeck.paths import migrate_legacy_data
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="blackbox")
+    migrate_legacy_data()
+
+    parser = argparse.ArgumentParser(prog="agentdeck")
     parser.add_argument("--version", action="store_true", help="print version and exit")
 
     subparsers = parser.add_subparsers(dest="command")
@@ -26,27 +29,27 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.version:
-        print(f"blackbox {__version__}")
+        print(f"agentdeck {__version__}")
         return
 
     if args.command in (None, "run"):
-        from blackbox.ui.app import run_app
+        from agentdeck.ui.app import run_app
 
         run_app()
     elif args.command == "install":
-        from blackbox.installer import install
+        from agentdeck.installer import install
 
         install()
     elif args.command == "uninstall":
-        from blackbox.installer import uninstall
+        from agentdeck.installer import uninstall
 
         uninstall()
     elif args.command == "doctor":
-        from blackbox.doctor import run_doctor
+        from agentdeck.doctor import run_doctor
 
         sys.exit(run_doctor())
     elif args.command == "replay":
-        from blackbox.ui.app import run_app
+        from agentdeck.ui.app import run_app
 
         run_app(
             replay_session=args.session,
@@ -54,10 +57,10 @@ def main() -> None:
             replay_browse=not args.session and not args.file,
         )
     elif args.command == "export":
-        from blackbox.export import export_session
+        from agentdeck.export import export_session
 
         output_path = export_session(args.session)
-        print(f"blackbox: exported to {output_path}")
+        print(f"agentdeck: exported to {output_path}")
 
 
 if __name__ == "__main__":

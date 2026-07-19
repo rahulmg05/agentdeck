@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from blackbox.events import parse_line
-from blackbox.pairing import PairTracker, ToolCallStatus, TurnGrouper
+from agentdeck.events import parse_line
+from agentdeck.pairing import PairTracker, ToolCallStatus, TurnGrouper
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -12,13 +12,13 @@ def load_events(fixture_name: str, filename: str = "main.jsonl"):
     return [parse_line(line, path) for line in path.read_text().splitlines() if line.strip()]
 
 
-def make_event(session_id, hook_event_name, bb_ts, **raw_extra):
+def make_event(session_id, hook_event_name, ad_ts, **raw_extra):
     line = json.dumps(
         {
-            "bb_schema": 1,
-            "bb_ts": bb_ts,
-            "bb_seq": 0,
-            "bb_host_pid": 1,
+            "ad_schema": 1,
+            "ad_ts": ad_ts,
+            "ad_seq": 0,
+            "ad_host_pid": 1,
             "event": {"session_id": session_id, "hook_event_name": hook_event_name, **raw_extra},
         }
     )
@@ -38,7 +38,7 @@ def test_pre_then_post_resolves_done_with_duration_from_event():
     assert tracker.open_calls() == []
 
 
-def test_falls_back_to_bb_ts_delta_when_duration_ms_missing():
+def test_falls_back_to_ad_ts_delta_when_duration_ms_missing():
     tracker = PairTracker()
     tracker.observe(make_event("s1", "PreToolUse", 100.0, tool_name="Bash", tool_use_id="t1"))
     call = tracker.observe(make_event("s1", "PostToolUse", 100.25, tool_name="Bash", tool_use_id="t1"))

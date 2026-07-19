@@ -1,6 +1,6 @@
 """Unit tests for courier/emit.py. Runs it as a real subprocess (it must work
-standalone, without the blackbox package installed) against an isolated HOME
-so tests never touch the developer's real ~/.blackbox.
+standalone, without the agentdeck package installed) against an isolated HOME
+so tests never touch the developer's real ~/.agentdeck.
 """
 
 import json
@@ -41,12 +41,12 @@ def test_valid_event_written(tmp_path):
     assert result.returncode == 0
     assert result.stdout == ""
 
-    out_file = tmp_path / ".blackbox" / "sessions" / "sess-1" / "main.jsonl"
+    out_file = tmp_path / ".agentdeck" / "sessions" / "sess-1" / "main.jsonl"
     lines = read_lines(out_file)
     assert len(lines) == 1
     assert lines[0]["event"]["tool_name"] == "Bash"
-    assert lines[0]["bb_schema"] == 1
-    assert "bb_ts" in lines[0]
+    assert lines[0]["ad_schema"] == 1
+    assert "ad_ts" in lines[0]
 
 
 def test_subagent_routed_to_own_file(tmp_path):
@@ -59,8 +59,8 @@ def test_subagent_routed_to_own_file(tmp_path):
     }
     run_courier(json.dumps(event), tmp_path)
 
-    main_file = tmp_path / ".blackbox" / "sessions" / "sess-1" / "main.jsonl"
-    agent_file = tmp_path / ".blackbox" / "sessions" / "sess-1" / "agent-agent-42.jsonl"
+    main_file = tmp_path / ".agentdeck" / "sessions" / "sess-1" / "main.jsonl"
+    agent_file = tmp_path / ".agentdeck" / "sessions" / "sess-1" / "agent-agent-42.jsonl"
     assert not main_file.exists()
     assert agent_file.exists()
 
@@ -75,9 +75,9 @@ def test_garbage_stdin_recorded_not_dropped(tmp_path):
     result = run_courier("not json at all {{{", tmp_path)
     assert result.returncode == 0
 
-    out_file = tmp_path / ".blackbox" / "sessions" / "_unknown" / "main.jsonl"
+    out_file = tmp_path / ".agentdeck" / "sessions" / "_unknown" / "main.jsonl"
     lines = read_lines(out_file)
-    assert lines[0]["event"]["bb_parse_error"] is True
+    assert lines[0]["event"]["ad_parse_error"] is True
 
 
 def test_huge_field_is_truncated(tmp_path):
@@ -88,11 +88,11 @@ def test_huge_field_is_truncated(tmp_path):
     }
     run_courier(json.dumps(event), tmp_path)
 
-    out_file = tmp_path / ".blackbox" / "sessions" / "sess-huge" / "main.jsonl"
+    out_file = tmp_path / ".agentdeck" / "sessions" / "sess-huge" / "main.jsonl"
     lines = read_lines(out_file)
-    assert lines[0]["bb_truncated"] is True
+    assert lines[0]["ad_truncated"] is True
     assert len(lines[0]["event"]["tool_response"]) < 40_000
-    assert "bb_truncated" in lines[0]["event"]["tool_response"]
+    assert "ad_truncated" in lines[0]["event"]["tool_response"]
 
 
 def test_redacts_env_style_secret_assignment(tmp_path):
@@ -103,7 +103,7 @@ def test_redacts_env_style_secret_assignment(tmp_path):
     }
     run_courier(json.dumps(event), tmp_path)
 
-    out_file = tmp_path / ".blackbox" / "sessions" / "sess-secret" / "main.jsonl"
+    out_file = tmp_path / ".agentdeck" / "sessions" / "sess-secret" / "main.jsonl"
     lines = read_lines(out_file)
     command = lines[0]["event"]["tool_input"]["command"]
     assert "sk-abc123XYZsecretvalue" not in command
@@ -118,7 +118,7 @@ def test_redacts_authorization_bearer_header(tmp_path):
     }
     run_courier(json.dumps(event), tmp_path)
 
-    out_file = tmp_path / ".blackbox" / "sessions" / "sess-secret2" / "main.jsonl"
+    out_file = tmp_path / ".agentdeck" / "sessions" / "sess-secret2" / "main.jsonl"
     lines = read_lines(out_file)
     command = lines[0]["event"]["tool_input"]["command"]
     assert "sk-supersecrettoken123" not in command
@@ -130,7 +130,7 @@ def test_multiple_events_append_in_order(tmp_path):
         event = {"hook_event_name": "PreToolUse", "session_id": "sess-multi", "seq": i}
         run_courier(json.dumps(event), tmp_path)
 
-    out_file = tmp_path / ".blackbox" / "sessions" / "sess-multi" / "main.jsonl"
+    out_file = tmp_path / ".agentdeck" / "sessions" / "sess-multi" / "main.jsonl"
     lines = read_lines(out_file)
     assert [line["event"]["seq"] for line in lines] == [0, 1, 2, 3, 4]
 
@@ -142,7 +142,7 @@ def test_session_id_sanitized_for_filesystem(tmp_path):
     }
     run_courier(json.dumps(event), tmp_path)
 
-    sessions_dir = tmp_path / ".blackbox" / "sessions"
+    sessions_dir = tmp_path / ".agentdeck" / "sessions"
     # must not have escaped the sessions directory
     for f in sessions_dir.rglob("*.jsonl"):
         assert sessions_dir in f.resolve().parents

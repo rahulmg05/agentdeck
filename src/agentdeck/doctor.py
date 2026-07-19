@@ -1,20 +1,17 @@
-"""blackbox doctor — checks that recording is actually working."""
+"""agentdeck doctor — checks that recording is actually working."""
 
 import json
 import subprocess
 import sys
 import time
-from pathlib import Path
 
-from blackbox.installer import EVENTS, SETTINGS_PATH, _courier_path
-
-BLACKBOX_DIR = Path.home() / ".blackbox"
-SESSIONS_DIR = BLACKBOX_DIR / "sessions"
+from agentdeck.installer import EVENTS, SETTINGS_PATH, _courier_path
+from agentdeck.paths import SESSIONS_DIR
 
 
 def _check_registration() -> bool:
     if not SETTINGS_PATH.exists():
-        print(f"[FAIL] {SETTINGS_PATH} does not exist — run `blackbox install`")
+        print(f"[FAIL] {SETTINGS_PATH} does not exist — run `agentdeck install`")
         return False
 
     try:
@@ -53,7 +50,7 @@ def _check_courier_runnable() -> bool:
     sample_event = json.dumps(
         {
             "hook_event_name": "PreToolUse",
-            "session_id": "bb-doctor-selftest",
+            "session_id": "ad-doctor-selftest",
             "tool_name": "Bash",
             "tool_input": {"command": "echo doctor"},
         }
@@ -77,7 +74,7 @@ def _check_courier_runnable() -> bool:
         print(f"[FAIL] courier wrote to stdout (should be silent): {result.stdout!r}")
         return False
 
-    selftest_file = SESSIONS_DIR / "bb-doctor-selftest" / "main.jsonl"
+    selftest_file = SESSIONS_DIR / "ad-doctor-selftest" / "main.jsonl"
     if not selftest_file.exists():
         print("[FAIL] courier ran but did not write the expected self-test event")
         return False
@@ -95,7 +92,7 @@ def _check_courier_runnable() -> bool:
 def _check_log_writable() -> bool:
     try:
         SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
-        probe = SESSIONS_DIR / ".bb-doctor-probe"
+        probe = SESSIONS_DIR / ".ad-doctor-probe"
         probe.write_text("ok")
         probe.unlink()
     except OSError as exc:

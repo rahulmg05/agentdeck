@@ -3,7 +3,7 @@ color, tool/fail counts (design doc Phase 4)."""
 
 from textual.widgets import DataTable
 
-from blackbox.events import SessionInfo, SessionRegistry
+from agentdeck.events import SessionInfo, SessionRegistry
 
 LIVENESS_DOT = {"running": "●", "idle": "○", "ended": "◌"}
 

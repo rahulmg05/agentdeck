@@ -9,7 +9,7 @@ import subprocess
 import tomllib
 from pathlib import Path
 
-CONFIG_PATH = Path.home() / ".blackbox" / "config.toml"
+from agentdeck.paths import CONFIG_PATH
 
 
 def notifications_enabled(config_path: Path = CONFIG_PATH) -> bool:

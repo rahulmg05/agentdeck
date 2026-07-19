@@ -7,7 +7,7 @@ from textual.containers import VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Static
 
-from blackbox.events import Event
+from agentdeck.events import Event
 
 
 class DetailScreen(ModalScreen):

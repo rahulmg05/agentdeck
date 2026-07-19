@@ -38,8 +38,8 @@ still open, revisit once more real usage accumulates.
 **8. Host-side timestamp: CONFIRMED absent.** No field resembling a
 courier-independent timestamp appears in any captured payload. This means
 the causality-aware pairing fix (design doc section 3 — order a matched
-Pre/Post pair by event type, not by comparing `bb_ts`) is necessary, not
-optional: `bb_ts` really is the only timestamp available, and it really is
+Pre/Post pair by event type, not by comparing `ad_ts`) is necessary, not
+optional: `ad_ts` really is the only timestamp available, and it really is
 measured after whatever scheduling delay the courier picked up.
 
 **9. `agent_id` filesystem-safety: CONFIRMED safe.** Observed values are
@@ -54,7 +54,7 @@ This changes the pairing design in a good way: the causality-ordering fix
 (section 3) is still needed to decide *when* to swap a spinner to a
 checkmark and in what order events render, but the duration *number* shown
 in the UI should come straight from `duration_ms` on the `Post` event rather
-than being derived from `bb_ts(post) - bb_ts(pre)`. Use the courier-timestamp
+than being derived from `ad_ts(post) - ad_ts(pre)`. Use the courier-timestamp
 delta only as a fallback if `duration_ms` is ever absent.
 
 **`PostToolBatch` is a self-contained summary of the whole batch, not just a

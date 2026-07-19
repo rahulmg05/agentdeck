@@ -1,16 +1,16 @@
 import json
 from pathlib import Path
 
-from blackbox.events import SessionRegistry, parse_line, stable_color
+from agentdeck.events import SessionRegistry, parse_line, stable_color
 
 
 def make_event(session_id: str, cwd: str, hook_event_name: str = "PreToolUse") -> object:
     line = json.dumps(
         {
-            "bb_schema": 1,
-            "bb_ts": 100.0,
-            "bb_seq": 0,
-            "bb_host_pid": 1,
+            "ad_schema": 1,
+            "ad_ts": 100.0,
+            "ad_seq": 0,
+            "ad_host_pid": 1,
             "event": {"session_id": session_id, "cwd": cwd, "hook_event_name": hook_event_name},
         }
     )
@@ -19,15 +19,15 @@ def make_event(session_id: str, cwd: str, hook_event_name: str = "PreToolUse") -
 
 def test_app_color_derived_from_cwd_basename():
     registry = SessionRegistry()
-    registry.observe(make_event("s1", "/Users/me/projects/blackbox"))
+    registry.observe(make_event("s1", "/Users/me/projects/agentdeck"))
     info = registry.get("s1")
-    assert info.app_color == stable_color("blackbox")
+    assert info.app_color == stable_color("agentdeck")
 
 
 def test_sessions_in_same_project_share_app_color_but_not_session_color():
     registry = SessionRegistry()
-    registry.observe(make_event("s1", "/Users/me/projects/blackbox"))
-    registry.observe(make_event("s2", "/Users/me/projects/blackbox"))
+    registry.observe(make_event("s1", "/Users/me/projects/agentdeck"))
+    registry.observe(make_event("s2", "/Users/me/projects/agentdeck"))
 
     info1 = registry.get("s1")
     info2 = registry.get("s2")
@@ -37,7 +37,7 @@ def test_sessions_in_same_project_share_app_color_but_not_session_color():
 
 def test_sessions_in_different_projects_get_different_app_colors():
     registry = SessionRegistry()
-    registry.observe(make_event("s1", "/Users/me/projects/blackbox"))
+    registry.observe(make_event("s1", "/Users/me/projects/agentdeck"))
     registry.observe(make_event("s2", "/Users/me/projects/other-repo"))
 
     info1 = registry.get("s1")
@@ -49,7 +49,7 @@ def test_app_color_defaults_before_any_cwd_seen():
     registry = SessionRegistry()
     line = json.dumps(
         {
-            "bb_schema": 1, "bb_ts": 100.0, "bb_seq": 0, "bb_host_pid": 1,
+            "ad_schema": 1, "ad_ts": 100.0, "ad_seq": 0, "ad_host_pid": 1,
             "event": {"session_id": "s1", "hook_event_name": "PreToolUse"},
         }
     )

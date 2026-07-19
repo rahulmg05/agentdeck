@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from blackbox.pricing import DEFAULT_PRICING
-from blackbox.reader import load_session_events, scan_sessions
+from agentdeck.pricing import DEFAULT_PRICING
+from agentdeck.reader import load_session_events, scan_sessions
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -11,8 +11,8 @@ def test_load_session_events_reads_main_and_agent_files():
     assert len(events) > 0
     assert any(e.agent_id for e in events)
     assert any(e.agent_id is None for e in events)
-    # sorted by bb_ts
-    assert all(events[i].bb_ts <= events[i + 1].bb_ts for i in range(len(events) - 1))
+    # sorted by ad_ts
+    assert all(events[i].ad_ts <= events[i + 1].ad_ts for i in range(len(events) - 1))
 
 
 def test_load_session_events_empty_dir_returns_empty(tmp_path):
@@ -46,7 +46,7 @@ def test_scan_sessions_ignores_empty_session_directory(tmp_path):
     real_session = tmp_path / "sess-real"
     real_session.mkdir()
     (real_session / "main.jsonl").write_text(
-        '{"bb_schema":1,"bb_ts":100.0,"bb_seq":0,"bb_host_pid":1,'
+        '{"ad_schema":1,"ad_ts":100.0,"ad_seq":0,"ad_host_pid":1,'
         '"event":{"session_id":"sess-real","hook_event_name":"SessionStart"}}\n'
     )
 
@@ -60,7 +60,7 @@ def test_scan_sessions_sorted_most_recent_first(tmp_path):
         d = tmp_path / name
         d.mkdir()
         (d / "main.jsonl").write_text(
-            f'{{"bb_schema":1,"bb_ts":{ts},"bb_seq":0,"bb_host_pid":1,'
+            f'{{"ad_schema":1,"ad_ts":{ts},"ad_seq":0,"ad_host_pid":1,'
             f'"event":{{"session_id":"{name}","hook_event_name":"SessionStart"}}}}\n'
         )
 

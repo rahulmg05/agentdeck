@@ -1,16 +1,15 @@
 """Per-model USD-per-million-token pricing, editable in
-~/.blackbox/config.toml (design doc Phase 5).
+~/.agentdeck/config.toml (design doc Phase 5).
 
-These default rates are approximate and WILL go stale — blackbox does not
+These default rates are approximate and WILL go stale — agentdeck does not
 fetch live pricing. Edit config.toml against current Anthropic pricing.
 """
 
 import tomllib
 from pathlib import Path
 
-from blackbox.transcript import Usage
-
-CONFIG_PATH = Path.home() / ".blackbox" / "config.toml"
+from agentdeck.paths import CONFIG_PATH
+from agentdeck.transcript import Usage
 
 DEFAULT_PRICING: dict[str, dict[str, float]] = {
     "claude-opus-4-8": {"input": 15.0, "output": 75.0, "cache_write": 18.75, "cache_read": 1.50},
@@ -20,9 +19,9 @@ DEFAULT_PRICING: dict[str, dict[str, float]] = {
 }
 
 DEFAULT_CONFIG_TOML = """\
-# Blackbox pricing config — USD per MILLION tokens.
+# AgentDeck pricing config — USD per MILLION tokens.
 # These are approximate defaults and will go stale; verify against current
-# Anthropic pricing and edit as needed. blackbox does not fetch live pricing.
+# Anthropic pricing and edit as needed. agentdeck does not fetch live pricing.
 # "default" applies to any model id not listed explicitly below.
 
 [pricing."claude-opus-4-8"]

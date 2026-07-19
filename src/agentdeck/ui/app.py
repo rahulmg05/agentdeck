@@ -1,4 +1,4 @@
-"""Blackbox console: firehose (Phase 3) + cockpit layout (Phase 4). Three
+"""AgentDeck console: firehose (Phase 3) + cockpit layout (Phase 4). Three
 view modes share one reader -> dispatcher pipeline and one continuously
 updated set of widgets; switching modes only toggles which widgets are
 visible, so no state is lost in the switch (design doc Phase 4 checkpoint).
@@ -15,21 +15,21 @@ from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Footer, Header, Static
 
-from blackbox.events import Event, SessionRegistry, parse_line
-from blackbox.notify import notifications_enabled, send_notification
-from blackbox.pairing import PairTracker
-from blackbox.pricing import ensure_config_exists, estimate_cost_usd, load_pricing
-from blackbox.reader import DEFAULT_SESSIONS_DIR, Reader, load_session_events, scan_sessions
-from blackbox.transcript import TranscriptReader, build_chat_transcript
-from blackbox.ui.theme import icon_for, summarize
-from blackbox.ui.widgets.chat_transcript_screen import ChatTranscriptScreen
-from blackbox.ui.widgets.detail_screen import DetailScreen
-from blackbox.ui.widgets.focused_timeline import FocusedTimeline
-from blackbox.ui.widgets.search_screen import SearchScreen
-from blackbox.ui.widgets.session_browser_screen import SessionBrowserScreen
-from blackbox.ui.widgets.session_sidebar import SessionSidebar
-from blackbox.ui.widgets.session_stats_panel import SessionStatsPanel
-from blackbox.ui.widgets.timeline_log import TimelineLog
+from agentdeck.events import Event, SessionRegistry, parse_line
+from agentdeck.notify import notifications_enabled, send_notification
+from agentdeck.pairing import PairTracker
+from agentdeck.pricing import ensure_config_exists, estimate_cost_usd, load_pricing
+from agentdeck.reader import DEFAULT_SESSIONS_DIR, Reader, load_session_events, scan_sessions
+from agentdeck.transcript import TranscriptReader, build_chat_transcript
+from agentdeck.ui.theme import icon_for, summarize
+from agentdeck.ui.widgets.chat_transcript_screen import ChatTranscriptScreen
+from agentdeck.ui.widgets.detail_screen import DetailScreen
+from agentdeck.ui.widgets.focused_timeline import FocusedTimeline
+from agentdeck.ui.widgets.search_screen import SearchScreen
+from agentdeck.ui.widgets.session_browser_screen import SessionBrowserScreen
+from agentdeck.ui.widgets.session_sidebar import SessionSidebar
+from agentdeck.ui.widgets.session_stats_panel import SessionStatsPanel
+from agentdeck.ui.widgets.timeline_log import TimelineLog
 
 RUNNING_WINDOW_S = 60.0
 WALL_MAX_PANES = 4
@@ -43,8 +43,8 @@ REPLAY_SPEEDS: list[float | None] = [1.0, 5.0, 20.0, None]
 MAX_REPLAY_GAP_S = 3.0
 
 
-class BlackboxApp(App):
-    TITLE = "Blackbox"
+class AgentDeckApp(App):
+    TITLE = "AgentDeck"
     CSS = """
     #stats { height: 1; background: $panel; color: $text-muted; padding: 0 1; }
     #focused-layout { height: 1fr; }
@@ -255,7 +255,7 @@ class BlackboxApp(App):
                 speed = REPLAY_SPEEDS[self.replay_speed_index]
                 if speed is not None:
                     next_event = self.replay_events[self.replay_position]
-                    real_delay = max(0.0, next_event.bb_ts - event.bb_ts)
+                    real_delay = max(0.0, next_event.ad_ts - event.ad_ts)
                     delay = min(real_delay / speed, MAX_REPLAY_GAP_S)
                     if delay > 0:
                         await asyncio.sleep(delay)
@@ -352,13 +352,13 @@ class BlackboxApp(App):
 
         if event.hook_event_name == "Notification":
             message = event.raw.get("message") or "Claude Code notification"
-            send_notification(f"Blackbox — {session_label}", str(message))
+            send_notification(f"AgentDeck — {session_label}", str(message))
         elif event.hook_event_name == "PostToolUse":
             duration = event.raw.get("duration_ms")
             if isinstance(duration, (int, float)) and duration >= LONG_TASK_NOTIFY_THRESHOLD_MS:
                 tool = event.tool_name or "tool"
                 send_notification(
-                    f"Blackbox — {session_label}",
+                    f"AgentDeck — {session_label}",
                     f"{tool} finished after {duration / 1000:.0f}s",
                 )
 
@@ -419,10 +419,10 @@ class BlackboxApp(App):
         color = info.color if info else "#ffffff"
         app_color = info.app_color if info else "#ffffff"
         name = self.registry.display_name(event.session_id)
-        ts = time.strftime("%H:%M:%S", time.localtime(event.bb_ts)) if event.bb_ts else "--:--:--"
+        ts = time.strftime("%H:%M:%S", time.localtime(event.ad_ts)) if event.ad_ts else "--:--:--"
         icon = icon_for(event)
         summary = summarize(event)
-        truncated_marker = " [dim]\\[truncated][/dim]" if event.bb_truncated else ""
+        truncated_marker = " [dim]\\[truncated][/dim]" if event.ad_truncated else ""
         is_failure = event.hook_event_name in ("PostToolUseFailure", "StopFailure")
         icon_markup = f"[bold red]{icon}[/bold red]" if is_failure else icon
         lane_marker = "  ↳ " if event.agent_id else ""
@@ -727,7 +727,7 @@ def run_app(
 
     if replay_session:
         events = load_session_events(target / replay_session)
-        BlackboxApp(sessions_dir=target, replay_events=events).run()
+        AgentDeckApp(sessions_dir=target, replay_events=events).run()
         return
 
     if replay_file:
@@ -737,12 +737,12 @@ def run_app(
             for e in (parse_line(line, path) for line in path.read_text().splitlines() if line.strip())
             if e is not None
         ]
-        events.sort(key=lambda e: e.bb_ts)
-        BlackboxApp(sessions_dir=target, replay_events=events).run()
+        events.sort(key=lambda e: e.ad_ts)
+        AgentDeckApp(sessions_dir=target, replay_events=events).run()
         return
 
     if replay_browse:
-        BlackboxApp(sessions_dir=target, show_browser=True).run()
+        AgentDeckApp(sessions_dir=target, show_browser=True).run()
         return
 
-    BlackboxApp(sessions_dir=target).run()
+    AgentDeckApp(sessions_dir=target).run()

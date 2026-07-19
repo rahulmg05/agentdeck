@@ -1,4 +1,4 @@
-from blackbox.pricing import (
+from agentdeck.pricing import (
     DEFAULT_CONFIG_TOML,
     DEFAULT_PRICING,
     Usage,

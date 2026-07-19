@@ -1,6 +1,6 @@
 """Discovers session directories under a sessions root, tails each file
 (watchfiles), tracks a byte offset per file, and merges the resulting events
-across files by bb_ts (design doc section 2/3.1: file-per-actor means the
+across files by ad_ts (design doc section 2/3.1: file-per-actor means the
 console must watch a directory tree and merge streams, not tail one file).
 """
 
@@ -10,11 +10,10 @@ from pathlib import Path
 
 from watchfiles import Change, awatch
 
-from blackbox.events import Event, SessionRegistry, parse_line
-from blackbox.pricing import estimate_cost_usd
-from blackbox.transcript import TranscriptReader
-
-DEFAULT_SESSIONS_DIR = Path.home() / ".blackbox" / "sessions"
+from agentdeck.events import Event, SessionRegistry, parse_line
+from agentdeck.paths import SESSIONS_DIR as DEFAULT_SESSIONS_DIR
+from agentdeck.pricing import estimate_cost_usd
+from agentdeck.transcript import TranscriptReader
 
 
 class Reader:
@@ -68,15 +67,15 @@ class Reader:
         return events
 
     def load_history(self) -> list[Event]:
-        """Read all existing session files from the start, sorted by bb_ts."""
+        """Read all existing session files from the start, sorted by ad_ts."""
         events: list[Event] = []
         for path in self._discover_files():
             events.extend(self._read_new_lines(path))
-        events.sort(key=lambda e: e.bb_ts)
+        events.sort(key=lambda e: e.ad_ts)
         return events
 
     async def watch(self) -> AsyncIterator[Event]:
-        """Yield newly appended events as they land, merged by bb_ts within
+        """Yield newly appended events as they land, merged by ad_ts within
         each batch of filesystem-change notifications."""
         if not self.sessions_dir.exists():
             self.sessions_dir.mkdir(parents=True, exist_ok=True)
@@ -94,7 +93,7 @@ class Reader:
                     continue
                 batch.extend(self._read_new_lines(path))
 
-            batch.sort(key=lambda e: e.bb_ts)
+            batch.sort(key=lambda e: e.ad_ts)
             for event in batch:
                 yield event
 
@@ -122,7 +121,7 @@ def load_session_events(session_dir: Path) -> list[Event]:
             event = parse_line(raw_line, jsonl_file)
             if event is not None:
                 events.append(event)
-    events.sort(key=lambda e: e.bb_ts)
+    events.sort(key=lambda e: e.ad_ts)
     return events
 
 
@@ -142,7 +141,7 @@ def scan_sessions(sessions_dir: Path, pricing: dict) -> list[SessionSummary]:
         for event in events:
             registry.observe(event)
         # A session directory's name is its session_id in production
-        # (~/.blackbox/sessions/<session_id>/), but don't assume that here —
+        # (~/.agentdeck/sessions/<session_id>/), but don't assume that here —
         # look up whichever session the events themselves report, since
         # fixture/test directories are free to use descriptive names instead.
         sessions_seen = registry.all_sessions()

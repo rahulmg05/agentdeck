@@ -4,16 +4,16 @@ from pathlib import Path
 
 import pytest
 
-from blackbox.reader import Reader
+from agentdeck.reader import Reader
 
 
 def write_event(path: Path, session_id: str, hook_event_name: str, ts: float, **extra) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     envelope = {
-        "bb_schema": 1,
-        "bb_ts": ts,
-        "bb_seq": 0,
-        "bb_host_pid": 1,
+        "ad_schema": 1,
+        "ad_ts": ts,
+        "ad_seq": 0,
+        "ad_host_pid": 1,
         "event": {"session_id": session_id, "hook_event_name": hook_event_name, **extra},
     }
     with open(path, "a") as f:
@@ -34,7 +34,7 @@ def test_load_history_reads_all_events_sorted_by_ts(tmp_path):
 def test_load_history_skips_unparseable_lines_and_counts_them(tmp_path):
     path = tmp_path / "sess-a" / "main.jsonl"
     path.parent.mkdir(parents=True)
-    path.write_text('not valid json\n{"bb_schema":1,"bb_ts":100.0,"event":{"session_id":"sess-a"}}\n')
+    path.write_text('not valid json\n{"ad_schema":1,"ad_ts":100.0,"event":{"session_id":"sess-a"}}\n')
 
     reader = Reader(tmp_path)
     history = reader.load_history()

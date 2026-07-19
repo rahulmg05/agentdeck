@@ -1,6 +1,6 @@
 """Icon/summary rendering for the firehose (design doc Phase 3 visual design)."""
 
-from blackbox.events import FAILURE_EVENTS, Event
+from agentdeck.events import FAILURE_EVENTS, Event
 
 EVENT_ICONS = {
     "UserPromptSubmit": "▸",

@@ -6,7 +6,7 @@ import time
 from textual.screen import Screen
 from textual.widgets import DataTable, Footer, Header
 
-from blackbox.reader import SessionSummary
+from agentdeck.reader import SessionSummary
 
 
 def _format_duration(started_at: float | None, ended_at: float | None) -> str:

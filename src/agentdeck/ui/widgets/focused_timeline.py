@@ -12,8 +12,8 @@ from textual.message import Message
 from textual.widgets import DataTable
 from textual.widgets._data_table import TwoWayDict
 
-from blackbox.events import Event, SessionRegistry
-from blackbox.ui.theme import icon_for, summarize
+from agentdeck.events import Event, SessionRegistry
+from agentdeck.ui.theme import icon_for, summarize
 
 
 class FocusedTimeline(DataTable):
@@ -47,7 +47,7 @@ class FocusedTimeline(DataTable):
         caller iterates events in REVERSED chronological order (newest
         first) — see module docstring. Does not touch scroll position;
         callers doing a bulk load should scroll_home() once at the end."""
-        ts = time.strftime("%H:%M:%S", time.localtime(event.bb_ts)) if event.bb_ts else "--:--:--"
+        ts = time.strftime("%H:%M:%S", time.localtime(event.ad_ts)) if event.ad_ts else "--:--:--"
         icon = icon_for(event)
         is_failure = event.hook_event_name in ("PostToolUseFailure", "StopFailure")
         icon_markup = f"[bold red]{icon}[/bold red]" if is_failure else icon
@@ -75,7 +75,7 @@ class FocusedTimeline(DataTable):
     def _move_last_row_to_top(self) -> None:
         """Mirrors DataTable.sort()'s own internal reindexing (there's no
         public API for "insert at position 0"), keyed by our own tracked
-        Event.bb_ts rather than a visible column — adding a real column
+        Event.ad_ts rather than a visible column — adding a real column
         just to hold a sort key would make it visible in the table, and
         DataTable's `width=0` does not actually hide a column (checked
         empirically). This depends on DataTable's private _data/
@@ -87,7 +87,7 @@ class FocusedTimeline(DataTable):
         def sort_key(item):
             row_key, _ = item
             event = self._events.get(str(row_key.value))
-            return event.bb_ts if event else 0.0
+            return event.ad_ts if event else 0.0
 
         ordered_rows = sorted(self._data.items(), key=sort_key, reverse=True)
         self._row_locations = TwoWayDict(

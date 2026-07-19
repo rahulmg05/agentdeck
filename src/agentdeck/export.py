@@ -1,4 +1,4 @@
-"""blackbox export <session> -> self-contained HTML timeline (design doc
+"""agentdeck export <session> -> self-contained HTML timeline (design doc
 Phase 6). No external assets — everything inlined so the file is shareable
 on its own.
 """
@@ -7,11 +7,11 @@ import html
 import time
 from pathlib import Path
 
-from blackbox.reader import DEFAULT_SESSIONS_DIR, load_session_events
-from blackbox.ui.theme import icon_for, summarize
+from agentdeck.reader import DEFAULT_SESSIONS_DIR, load_session_events
+from agentdeck.ui.theme import icon_for, summarize
 
 TEMPLATE = """<!doctype html>
-<html><head><meta charset="utf-8"><title>Blackbox session {session_id}</title>
+<html><head><meta charset="utf-8"><title>AgentDeck session {session_id}</title>
 <style>
 body {{ font-family: ui-monospace, "SF Mono", Menlo, monospace; background:#1e1e2e; color:#cdd6f4;
         margin:0; padding:1.5rem; }}
@@ -26,7 +26,7 @@ h1 {{ font-size: 1rem; color: #89b4fa; font-weight: 600; }}
 .summary {{ color:#a6adc8; white-space:pre; overflow:hidden; text-overflow:ellipsis; }}
 </style></head>
 <body>
-<h1>Blackbox session {session_id} &mdash; {count} events</h1>
+<h1>AgentDeck session {session_id} &mdash; {count} events</h1>
 <div class="timeline">
 {rows}
 </div>
@@ -51,11 +51,11 @@ def export_session(
     session_dir = sessions_dir / session_id
     events = load_session_events(session_dir)
     if output_path is None:
-        output_path = Path(f"blackbox-{session_id}.html")
+        output_path = Path(f"agentdeck-{session_id}.html")
 
     rows = []
     for event in events:
-        ts = time.strftime("%H:%M:%S", time.localtime(event.bb_ts)) if event.bb_ts else "--:--:--"
+        ts = time.strftime("%H:%M:%S", time.localtime(event.ad_ts)) if event.ad_ts else "--:--:--"
         is_failure = event.hook_event_name in ("PostToolUseFailure", "StopFailure")
         classes = " ".join(
             filter(None, ["failure" if is_failure else "", "subagent" if event.agent_id else ""])

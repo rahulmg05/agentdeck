@@ -41,10 +41,10 @@ FAILURE_EVENTS = {"PostToolUseFailure", "StopFailure"}
 
 @dataclass
 class Event:
-    bb_schema: int
-    bb_ts: float
-    bb_host_pid: int
-    bb_truncated: bool
+    ad_schema: int
+    ad_ts: float
+    ad_host_pid: int
+    ad_truncated: bool
     session_id: str
     agent_id: str | None
     hook_event_name: str
@@ -85,15 +85,15 @@ def parse_line(line: str, source_file: Path) -> Event | None:
     if not isinstance(session_id, str) or not session_id:
         session_id = source_file.parent.name
 
-    bb_ts = envelope.get("bb_ts")
-    if not isinstance(bb_ts, (int, float)):
-        bb_ts = 0.0
+    ad_ts = envelope.get("ad_ts")
+    if not isinstance(ad_ts, (int, float)):
+        ad_ts = 0.0
 
     return Event(
-        bb_schema=envelope.get("bb_schema", 0),
-        bb_ts=float(bb_ts),
-        bb_host_pid=envelope.get("bb_host_pid", 0),
-        bb_truncated=bool(envelope.get("bb_truncated", False)),
+        ad_schema=envelope.get("ad_schema", 0),
+        ad_ts=float(ad_ts),
+        ad_host_pid=envelope.get("ad_host_pid", 0),
+        ad_truncated=bool(envelope.get("ad_truncated", False)),
         session_id=session_id,
         agent_id=event.get("agent_id"),
         hook_event_name=event.get("hook_event_name", "Unknown"),
@@ -153,8 +153,8 @@ class SessionRegistry:
             info.app_color = stable_color(Path(event.cwd).name)
         if event.raw.get("transcript_path"):
             info.transcript_path = event.raw["transcript_path"]
-        info.last_event_ts = max(info.last_event_ts, event.bb_ts)
-        info.first_event_ts = min(info.first_event_ts, event.bb_ts)
+        info.last_event_ts = max(info.last_event_ts, event.ad_ts)
+        info.first_event_ts = min(info.first_event_ts, event.ad_ts)
         if event.agent_id:
             info.agent_ids.add(event.agent_id)
 

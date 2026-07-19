@@ -1,4 +1,4 @@
-from blackbox.events import SessionRegistry
+from agentdeck.events import SessionRegistry
 
 
 def test_add_usage_accumulates_across_calls():

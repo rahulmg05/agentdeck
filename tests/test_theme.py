@@ -1,17 +1,17 @@
 import json
 from pathlib import Path
 
-from blackbox.events import parse_line
-from blackbox.ui.theme import icon_for
+from agentdeck.events import parse_line
+from agentdeck.ui.theme import icon_for
 
 
 def make_event(hook_event_name: str, **extra) -> object:
     line = json.dumps(
         {
-            "bb_schema": 1,
-            "bb_ts": 100.0,
-            "bb_seq": 0,
-            "bb_host_pid": 1,
+            "ad_schema": 1,
+            "ad_ts": 100.0,
+            "ad_seq": 0,
+            "ad_host_pid": 1,
             "event": {"session_id": "s1", "hook_event_name": hook_event_name, **extra},
         }
     )

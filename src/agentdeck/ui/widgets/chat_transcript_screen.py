@@ -6,7 +6,7 @@ from textual.containers import VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Markdown, Static
 
-from blackbox.transcript import ChatMessage
+from agentdeck.transcript import ChatMessage
 
 ROLE_LABEL = {"user": "▸ User", "assistant": "● Claude"}
 

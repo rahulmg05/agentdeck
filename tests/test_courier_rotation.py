@@ -9,7 +9,7 @@ COURIER_PATH = Path(__file__).resolve().parent.parent / "courier" / "emit.py"
 
 
 def load_emit_module():
-    spec = importlib.util.spec_from_file_location("bb_emit_under_test", COURIER_PATH)
+    spec = importlib.util.spec_from_file_location("ad_emit_under_test", COURIER_PATH)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module

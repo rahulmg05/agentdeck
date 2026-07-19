@@ -7,19 +7,19 @@ from pathlib import Path
 
 import pytest
 
-from blackbox.ui.app import BlackboxApp
-from blackbox.ui.widgets.detail_screen import DetailScreen
-from blackbox.ui.widgets.focused_timeline import FocusedTimeline
-from blackbox.ui.widgets.session_sidebar import SessionSidebar
+from agentdeck.ui.app import AgentDeckApp
+from agentdeck.ui.widgets.detail_screen import DetailScreen
+from agentdeck.ui.widgets.focused_timeline import FocusedTimeline
+from agentdeck.ui.widgets.session_sidebar import SessionSidebar
 
 
 def write_event(path: Path, session_id: str, hook_event_name: str, ts: float, **extra) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     envelope = {
-        "bb_schema": 1,
-        "bb_ts": ts,
-        "bb_seq": 0,
-        "bb_host_pid": 1,
+        "ad_schema": 1,
+        "ad_ts": ts,
+        "ad_seq": 0,
+        "ad_host_pid": 1,
         "event": {"session_id": session_id, "hook_event_name": hook_event_name, **extra},
     }
     with open(path, "a") as f:
@@ -36,7 +36,7 @@ def make_sessions_dir(tmp_path: Path, n: int, prefix="sess") -> Path:
 
 @pytest.mark.asyncio
 async def test_default_mode_is_focused_with_sidebar_and_timeline_visible():
-    app = BlackboxApp(sessions_dir=Path(__file__).parent / "fixtures")
+    app = AgentDeckApp(sessions_dir=Path(__file__).parent / "fixtures")
     async with app.run_test():
         assert app.mode == "focused"
         assert app.query_one("#focused-layout").display is True
@@ -47,7 +47,7 @@ async def test_default_mode_is_focused_with_sidebar_and_timeline_visible():
 @pytest.mark.asyncio
 async def test_mode_switching_preserves_underlying_state(tmp_path):
     make_sessions_dir(tmp_path, 2)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         count_before = app.event_count
         await pilot.press("f")
@@ -61,7 +61,7 @@ async def test_mode_switching_preserves_underlying_state(tmp_path):
 @pytest.mark.asyncio
 async def test_sidebar_lists_all_sessions(tmp_path):
     make_sessions_dir(tmp_path, 3)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test():
         sidebar = app.query_one("#sidebar", SessionSidebar)
         assert sidebar.row_count == 3
@@ -70,7 +70,7 @@ async def test_sidebar_lists_all_sessions(tmp_path):
 @pytest.mark.asyncio
 async def test_focused_timeline_shows_only_selected_session(tmp_path):
     make_sessions_dir(tmp_path, 2)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test():
         table = app.query_one("#focused-timeline", FocusedTimeline)
         # every visible row belongs to the currently selected session
@@ -82,7 +82,7 @@ async def test_focused_timeline_shows_only_selected_session(tmp_path):
 @pytest.mark.asyncio
 async def test_tab_cycles_sessions_and_disables_focus_follow(tmp_path):
     make_sessions_dir(tmp_path, 3)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         assert app.focus_follow is True
         first = app.selected_session_id
@@ -102,7 +102,7 @@ async def test_focus_follow_switches_to_newly_active_session(tmp_path):
     session_a = tmp_path / "sess-a"
     write_event(session_a / "main.jsonl", "sess-a", "SessionStart", 100.0)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         assert app.selected_session_id == "sess-a"
 
@@ -120,7 +120,7 @@ async def test_focus_follow_toggle_key_disables_and_freezes_selection(tmp_path):
     session_a = tmp_path / "sess-a"
     write_event(session_a / "main.jsonl", "sess-a", "SessionStart", 100.0)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("g")
         assert app.focus_follow is False
@@ -142,7 +142,7 @@ async def test_scrolling_down_in_focused_timeline_disables_focus_follow(tmp_path
     for i in range(40):
         write_event(session_dir / "main.jsonl", "sess-a", "PreToolUse", 100.0 + i, tool_name="Bash", tool_use_id=f"t{i}")
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.pause()
         table = app.query_one("#focused-timeline", FocusedTimeline)
@@ -167,7 +167,7 @@ async def test_scrolling_down_in_focused_timeline_disables_focus_follow(tmp_path
 @pytest.mark.asyncio
 async def test_enter_on_focused_row_opens_detail_screen(tmp_path):
     make_sessions_dir(tmp_path, 1)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         table = app.query_one("#focused-timeline", FocusedTimeline)
         table.focus()
@@ -183,7 +183,7 @@ async def test_enter_on_focused_row_opens_detail_screen(tmp_path):
 @pytest.mark.asyncio
 async def test_wall_mode_tiles_up_to_four_sessions_and_shows_more_strip(tmp_path):
     make_sessions_dir(tmp_path, 6)
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("w")
         await pilot.pause()
@@ -198,7 +198,7 @@ async def test_wall_mode_pane_receives_live_events(tmp_path):
     session_dir = tmp_path / "sess-a"
     write_event(session_dir / "main.jsonl", "sess-a", "SessionStart", 100.0)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("w")
         await pilot.pause()

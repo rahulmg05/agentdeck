@@ -6,17 +6,17 @@ from pathlib import Path
 
 import pytest
 
-from blackbox.ui.app import BlackboxApp
-from blackbox.ui.widgets.session_stats_panel import SessionStatsPanel
+from agentdeck.ui.app import AgentDeckApp
+from agentdeck.ui.widgets.session_stats_panel import SessionStatsPanel
 
 
 def write_event(path: Path, session_id: str, hook_event_name: str, ts: float, **extra) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     envelope = {
-        "bb_schema": 1,
-        "bb_ts": ts,
-        "bb_seq": 0,
-        "bb_host_pid": 1,
+        "ad_schema": 1,
+        "ad_ts": ts,
+        "ad_seq": 0,
+        "ad_host_pid": 1,
         "event": {"session_id": session_id, "hook_event_name": hook_event_name, **extra},
     }
     with open(path, "a") as f:
@@ -47,7 +47,7 @@ def write_transcript_usage(path: Path, model: str, input_tokens: int, output_tok
 async def test_session_stats_panel_shows_zero_before_any_transcript_data(tmp_path):
     write_event(tmp_path / "sess-1" / "main.jsonl", "sess-1", "SessionStart", 100.0)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test():
         panel = app.query_one("#session-stats-panel", SessionStatsPanel)
         text = str(panel.query_one("#session-stats-text").content)
@@ -67,7 +67,7 @@ async def test_transcript_polling_updates_session_stats_panel(tmp_path):
     )
     write_transcript_usage(transcript, "claude-sonnet-5", 1_000_000, 1_000_000)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test():
         app._poll_transcripts()
 
@@ -89,7 +89,7 @@ async def test_stats_bar_shows_aggregate_cost_across_sessions(tmp_path):
     write_transcript_usage(t1, "claude-sonnet-5", 1_000_000, 0)
     write_transcript_usage(t2, "claude-sonnet-5", 1_000_000, 0)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test():
         app._poll_transcripts()
         stats_text = str(app.query_one("#stats").content)
@@ -104,10 +104,10 @@ async def test_switching_selected_session_updates_stats_panel(tmp_path):
     write_transcript_usage(t1, "claude-sonnet-5", 500_000, 0)
     write_transcript_usage(t2, "claude-sonnet-5", 999_000, 0)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         app._poll_transcripts()
-        await pilot.press("tab")  # sess-a is most recent by bb_ts order... move to next
+        await pilot.press("tab")  # sess-a is most recent by ad_ts order... move to next
 
         panel = app.query_one("#session-stats-panel", SessionStatsPanel)
         text = str(panel.query_one("#session-stats-text").content)
@@ -124,7 +124,7 @@ async def test_transcript_reader_reused_not_recreated_each_poll(tmp_path):
     )
     write_transcript_usage(transcript, "claude-sonnet-5", 100, 50)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test():
         app._poll_transcripts()
         reader_first = app._transcript_readers["sess-1"]

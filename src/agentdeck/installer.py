@@ -1,4 +1,4 @@
-"""blackbox install / uninstall — merge or remove courier hook entries in
+"""agentdeck install / uninstall — merge or remove courier hook entries in
 ~/.claude/settings.json. Additive JSON merge: never touches hook entries that
 aren't ours, always backs up the file first.
 """
@@ -36,15 +36,15 @@ EVENTS = [
 
 
 def _courier_path() -> Path:
-    """Prefer the repo-checkout copy (dev workflow: `uv run blackbox
+    """Prefer the repo-checkout copy (dev workflow: `uv run agentdeck
     install` against a source tree) and fall back to the copy bundled
     inside the installed package (pipx/pip install — see the
     force-include in pyproject.toml, since courier/emit.py lives outside
-    src/blackbox and wouldn't otherwise ship in the wheel at all)."""
+    src/agentdeck and wouldn't otherwise ship in the wheel at all)."""
     dev_path = Path(__file__).resolve().parent.parent.parent / "courier" / "emit.py"
     if dev_path.exists():
         return dev_path
-    packaged = importlib.resources.files("blackbox") / "courier" / "emit.py"
+    packaged = importlib.resources.files("agentdeck") / "courier" / "emit.py"
     return Path(str(packaged))
 
 
@@ -59,7 +59,7 @@ def _load_settings() -> dict:
         return json.loads(SETTINGS_PATH.read_text())
     except json.JSONDecodeError as exc:
         raise SystemExit(
-            f"blackbox: {SETTINGS_PATH} contains invalid JSON ({exc}); "
+            f"agentdeck: {SETTINGS_PATH} contains invalid JSON ({exc}); "
             "aborting rather than risk corrupting it further"
         )
 
@@ -67,7 +67,7 @@ def _load_settings() -> dict:
 def _backup(path: Path) -> Path | None:
     if not path.exists():
         return None
-    backup_path = path.with_name(f"{path.name}.bb-backup-{int(time.time())}")
+    backup_path = path.with_name(f"{path.name}.ad-backup-{int(time.time())}")
     shutil.copy2(path, backup_path)
     return backup_path
 
@@ -111,18 +111,18 @@ def install() -> None:
     _write_settings(settings)
 
     if backup:
-        print(f"blackbox: backed up existing settings to {backup}")
+        print(f"agentdeck: backed up existing settings to {backup}")
     if added:
-        print(f"blackbox: registered courier for {len(added)} event(s): {', '.join(added)}")
+        print(f"agentdeck: registered courier for {len(added)} event(s): {', '.join(added)}")
     if updated:
-        print(f"blackbox: updated courier command for {len(updated)} event(s) (interpreter path changed)")
+        print(f"agentdeck: updated courier command for {len(updated)} event(s) (interpreter path changed)")
     if not added and not updated:
-        print("blackbox: courier already registered for all events (nothing to do)")
+        print("agentdeck: courier already registered for all events (nothing to do)")
 
 
 def uninstall() -> None:
     if not SETTINGS_PATH.exists():
-        print("blackbox: no settings.json found, nothing to uninstall")
+        print("agentdeck: no settings.json found, nothing to uninstall")
         return
 
     settings = _load_settings()
@@ -153,8 +153,8 @@ def uninstall() -> None:
 
     _write_settings(settings)
     if backup:
-        print(f"blackbox: backed up settings to {backup}")
+        print(f"agentdeck: backed up settings to {backup}")
     if removed_from:
-        print(f"blackbox: removed courier registration from {len(removed_from)} event(s)")
+        print(f"agentdeck: removed courier registration from {len(removed_from)} event(s)")
     else:
-        print("blackbox: courier was not registered, nothing to remove")
+        print("agentdeck: courier was not registered, nothing to remove")

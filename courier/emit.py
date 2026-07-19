@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Blackbox courier. Reads one Claude Code hook event on stdin, appends one
-enriched JSON line to ~/.blackbox/sessions/<session_id>/{main,agent-<id>}.jsonl,
+"""AgentDeck courier. Reads one Claude Code hook event on stdin, appends one
+enriched JSON line to ~/.agentdeck/sessions/<session_id>/{main,agent-<id>}.jsonl,
 and exits 0 unconditionally.
 
 Stdlib only (principle 6, design doc section 5) — must not import anything
-from the `blackbox` console package or any third-party library, since it has
+from the `agentdeck` console package or any third-party library, since it has
 to run standalone wherever Claude Code invokes it, independent of whether the
 console is installed.
 
@@ -26,9 +26,9 @@ except ImportError:
     fcntl = None
 
 SCHEMA_VERSION = 1
-BLACKBOX_DIR = Path.home() / ".blackbox"
-SESSIONS_DIR = BLACKBOX_DIR / "sessions"
-FALLBACK_ERROR_FILE = BLACKBOX_DIR / "errors.jsonl"
+AGENTDECK_DIR = Path.home() / ".agentdeck"
+SESSIONS_DIR = AGENTDECK_DIR / "sessions"
+FALLBACK_ERROR_FILE = AGENTDECK_DIR / "errors.jsonl"
 
 # Each session/agent file rotates independently once it crosses this size
 # (design doc section 6).
@@ -81,7 +81,7 @@ def _truncate_tree(node, state):
         if len(encoded) > TRUNCATE_LIMIT_BYTES:
             state["truncated"] = True
             head = encoded[:TRUNCATE_LIMIT_BYTES].decode("utf-8", errors="ignore")
-            return f"{head}...<bb_truncated original {len(encoded)} bytes>"
+            return f"{head}...<ad_truncated original {len(encoded)} bytes>"
         return node
     if isinstance(node, dict):
         return {k: _truncate_tree(v, state) for k, v in node.items()}
@@ -121,13 +121,13 @@ def _determine_path(event: dict) -> Path:
 
 def _build_envelope(event: dict, truncated: bool) -> dict:
     envelope = {
-        "bb_schema": SCHEMA_VERSION,
-        "bb_ts": time.time(),
-        "bb_seq": 0,
-        "bb_host_pid": os.getpid(),
+        "ad_schema": SCHEMA_VERSION,
+        "ad_ts": time.time(),
+        "ad_seq": 0,
+        "ad_host_pid": os.getpid(),
     }
     if truncated:
-        envelope["bb_truncated"] = True
+        envelope["ad_truncated"] = True
     envelope["event"] = event
     return envelope
 
@@ -190,8 +190,8 @@ def _read_event() -> dict:
     try:
         parsed = json.loads(raw)
     except Exception:
-        return {"bb_parse_error": True, "bb_raw_prefix": raw[:200]}
-    return parsed if isinstance(parsed, dict) else {"bb_parse_error": True}
+        return {"ad_parse_error": True, "ad_raw_prefix": raw[:200]}
+    return parsed if isinstance(parsed, dict) else {"ad_parse_error": True}
 
 
 def main() -> None:
@@ -208,10 +208,10 @@ def main() -> None:
             err_line = (
                 json.dumps(
                     {
-                        "bb_schema": SCHEMA_VERSION,
-                        "bb_ts": time.time(),
-                        "bb_host_pid": os.getpid(),
-                        "bb_error": str(exc)[:200],
+                        "ad_schema": SCHEMA_VERSION,
+                        "ad_ts": time.time(),
+                        "ad_host_pid": os.getpid(),
+                        "ad_error": str(exc)[:200],
                     },
                     separators=(",", ":"),
                 )

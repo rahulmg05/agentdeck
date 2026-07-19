@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 
-from blackbox.transcript import (
+from agentdeck.transcript import (
     ChatMessage,
     TranscriptReader,
     build_chat_transcript,
@@ -133,7 +133,7 @@ def test_build_chat_transcript_merges_user_and_assistant_in_order():
     class FakeEvent:
         def __init__(self, prompt, ts):
             self.raw = {"prompt": prompt}
-            self.bb_ts = ts
+            self.ad_ts = ts
 
     # assistant message "hi" is at 2026-07-18T20:00:01Z in the fixture
     import datetime
@@ -156,7 +156,7 @@ def test_build_chat_transcript_merges_user_and_assistant_in_order():
 def test_build_chat_transcript_with_no_transcript_path_still_returns_user_turns():
     class FakeEvent:
         raw = {"prompt": "hello"}
-        bb_ts = 100.0
+        ad_ts = 100.0
 
     transcript = build_chat_transcript([FakeEvent()], None)
     assert transcript == [ChatMessage(role="user", text="hello", ts=100.0)]
@@ -165,6 +165,6 @@ def test_build_chat_transcript_with_no_transcript_path_still_returns_user_turns(
 def test_build_chat_transcript_skips_events_without_prompt_field():
     class FakeEvent:
         raw = {}
-        bb_ts = 100.0
+        ad_ts = 100.0
 
     assert build_chat_transcript([FakeEvent()], None) == []

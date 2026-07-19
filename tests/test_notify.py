@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from blackbox.notify import notifications_enabled, send_notification
+from agentdeck.notify import notifications_enabled, send_notification
 
 
 def test_notifications_disabled_when_no_config(tmp_path):
@@ -32,17 +32,17 @@ def test_notifications_disabled_when_section_missing(tmp_path):
 
 
 def test_send_notification_never_raises_on_subprocess_failure():
-    with patch("blackbox.notify.subprocess.run", side_effect=OSError("no such tool")):
+    with patch("agentdeck.notify.subprocess.run", side_effect=OSError("no such tool")):
         send_notification("title", "message")  # must not raise
 
 
 def test_send_notification_never_raises_on_unknown_platform():
-    with patch("blackbox.notify.platform.system", return_value="Plan9"):
+    with patch("agentdeck.notify.platform.system", return_value="Plan9"):
         send_notification("title", "message")  # must not raise, must not attempt a subprocess
 
 
 def test_osascript_string_escapes_quotes_and_backslashes():
-    from blackbox.notify import _osascript_string
+    from agentdeck.notify import _osascript_string
 
     result = _osascript_string('say "hi" \\ bye')
     assert result == '"say \\"hi\\" \\\\ bye"'

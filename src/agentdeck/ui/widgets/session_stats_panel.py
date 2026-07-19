@@ -4,7 +4,7 @@ doc Phase 5)."""
 from textual.containers import Vertical
 from textual.widgets import Sparkline, Static
 
-from blackbox.events import SessionInfo
+from agentdeck.events import SessionInfo
 
 
 class SessionStatsPanel(Vertical):

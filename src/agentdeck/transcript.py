@@ -153,7 +153,7 @@ def build_chat_transcript(user_prompt_events, transcript_path: Path | None) -> l
     """Merge UserPromptSubmit hook events (user turns) with assistant text
     extracted from the transcript file, sorted chronologically."""
     messages = [
-        ChatMessage(role="user", text=str(e.raw.get("prompt", "")), ts=e.bb_ts)
+        ChatMessage(role="user", text=str(e.raw.get("prompt", "")), ts=e.ad_ts)
         for e in user_prompt_events
         if e.raw.get("prompt")
     ]

@@ -11,8 +11,8 @@ from pathlib import Path
 import pytest
 from textual.widgets import RichLog, Static
 
-from blackbox.events import stable_color
-from blackbox.ui.app import BlackboxApp
+from agentdeck.events import stable_color
+from agentdeck.ui.app import AgentDeckApp
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -24,10 +24,10 @@ def count_fixture_lines() -> int:
 def write_event(path: Path, session_id: str, hook_event_name: str, ts: float, **extra) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     envelope = {
-        "bb_schema": 1,
-        "bb_ts": ts,
-        "bb_seq": 0,
-        "bb_host_pid": 1,
+        "ad_schema": 1,
+        "ad_ts": ts,
+        "ad_seq": 0,
+        "ad_host_pid": 1,
         "event": {"session_id": session_id, "hook_event_name": hook_event_name, **extra},
     }
     with open(path, "a") as f:
@@ -45,14 +45,14 @@ def test_stable_color_is_deterministic_not_hash_randomized():
 
     expected_digest = hashlib.sha256(b"session-abc").digest()[0]
     color = stable_color("session-abc")
-    from blackbox.events import _PALETTE
+    from agentdeck.events import _PALETTE
 
     assert color == _PALETTE[expected_digest % len(_PALETTE)]
 
 
 @pytest.mark.asyncio
 async def test_loads_history_from_fixtures():
-    app = BlackboxApp(sessions_dir=FIXTURES)
+    app = AgentDeckApp(sessions_dir=FIXTURES)
     async with app.run_test() as pilot:
         assert app.event_count == count_fixture_lines()
         # firehose is hidden (not laid out) unless selected — RichLog defers
@@ -65,7 +65,7 @@ async def test_loads_history_from_fixtures():
 
 @pytest.mark.asyncio
 async def test_stats_bar_shows_session_count():
-    app = BlackboxApp(sessions_dir=FIXTURES)
+    app = AgentDeckApp(sessions_dir=FIXTURES)
     async with app.run_test():
         stats_text = str(app.query_one("#stats", Static).content)
         assert "events:" in stats_text
@@ -76,7 +76,7 @@ async def test_stats_bar_shows_session_count():
 
 @pytest.mark.asyncio
 async def test_clear_keybinding_empties_view(pilot_tmp_path=None):
-    app = BlackboxApp(sessions_dir=FIXTURES)
+    app = AgentDeckApp(sessions_dir=FIXTURES)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -93,7 +93,7 @@ async def test_live_tail_picks_up_new_event(tmp_path):
     session_dir = tmp_path / "sess-live"
     write_event(session_dir / "main.jsonl", "sess-live", "SessionStart", time.time())
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -113,7 +113,7 @@ async def test_pause_freezes_view_but_not_bookkeeping(tmp_path):
     session_dir = tmp_path / "sess-live"
     write_event(session_dir / "main.jsonl", "sess-live", "SessionStart", time.time())
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -147,7 +147,7 @@ async def test_scroll_down_pauses_autoscroll_end_resumes(tmp_path):
     for i in range(40):
         write_event(session_dir / "main.jsonl", "sess-live", "PreToolUse", 100.0 + i, tool_name="Bash")
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         # RichLog defers rendering until its size is known (see its own
         # docstring) — give layout a tick to settle before reading/setting
@@ -185,7 +185,7 @@ async def test_filter_by_session_number(tmp_path):
     write_event(tmp_path / "sess-a" / "main.jsonl", "sess-a", "PreToolUse", 101.0, tool_name="Bash")
     write_event(tmp_path / "sess-b" / "main.jsonl", "sess-b", "SessionStart", 100.5)
 
-    app = BlackboxApp(sessions_dir=tmp_path)
+    app = AgentDeckApp(sessions_dir=tmp_path)
     async with app.run_test() as pilot:
         await pilot.press("f")
         await pilot.pause()
@@ -194,7 +194,7 @@ async def test_filter_by_session_number(tmp_path):
         assert len(log.lines) == 3
 
         await pilot.press("1")
-        # session "a" started first chronologically (bb_ts 100.0 < 100.5) so
+        # session "a" started first chronologically (ad_ts 100.0 < 100.5) so
         # it should be filter slot 1
         assert len(log.lines) == 2
 

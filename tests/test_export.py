@@ -1,7 +1,7 @@
 from html.parser import HTMLParser
 from pathlib import Path
 
-from blackbox.export import export_session
+from agentdeck.export import export_session
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -48,7 +48,7 @@ def test_export_escapes_html_special_characters(tmp_path):
     session_dir = tmp_path / "sess-xss"
     session_dir.mkdir()
     (session_dir / "main.jsonl").write_text(
-        '{"bb_schema":1,"bb_ts":100.0,"bb_seq":0,"bb_host_pid":1,'
+        '{"ad_schema":1,"ad_ts":100.0,"ad_seq":0,"ad_host_pid":1,'
         '"event":{"session_id":"sess-xss","hook_event_name":"UserPromptSubmit",'
         '"prompt":"<script>alert(1)</script> & \\"quotes\\""}}\n'
     )
@@ -64,11 +64,11 @@ def test_export_marks_failures_and_subagent_lanes(tmp_path):
     session_dir = tmp_path / "sess-1"
     session_dir.mkdir()
     (session_dir / "main.jsonl").write_text(
-        '{"bb_schema":1,"bb_ts":100.0,"bb_seq":0,"bb_host_pid":1,'
+        '{"ad_schema":1,"ad_ts":100.0,"ad_seq":0,"ad_host_pid":1,'
         '"event":{"session_id":"sess-1","hook_event_name":"PostToolUseFailure","tool_name":"Bash"}}\n'
     )
     (session_dir / "agent-a1.jsonl").write_text(
-        '{"bb_schema":1,"bb_ts":101.0,"bb_seq":0,"bb_host_pid":1,'
+        '{"ad_schema":1,"ad_ts":101.0,"ad_seq":0,"ad_host_pid":1,'
         '"event":{"session_id":"sess-1","agent_id":"a1","hook_event_name":"PreToolUse","tool_name":"Read"}}\n'
     )
 
@@ -84,10 +84,10 @@ def test_export_default_output_path_uses_session_id(tmp_path, monkeypatch):
     session_dir = tmp_path / "sessions" / "sess-1"
     session_dir.mkdir(parents=True)
     (session_dir / "main.jsonl").write_text(
-        '{"bb_schema":1,"bb_ts":100.0,"bb_seq":0,"bb_host_pid":1,'
+        '{"ad_schema":1,"ad_ts":100.0,"ad_seq":0,"ad_host_pid":1,'
         '"event":{"session_id":"sess-1","hook_event_name":"SessionStart"}}\n'
     )
 
     output = export_session("sess-1", sessions_dir=tmp_path / "sessions")
-    assert output.name == "blackbox-sess-1.html"
+    assert output.name == "agentdeck-sess-1.html"
     assert output.exists()

@@ -1,10 +1,10 @@
-# Blackbox
+# AgentDeck
 
 A flight recorder + live cockpit TUI for Claude Code sessions.
 
 Claude Code's activity — prompts, tool calls, file edits, subagents, token
 spend — normally only exists as scrolling chat text, gone the moment the
-terminal closes. Blackbox fixes that. It's two cooperating pieces:
+terminal closes. AgentDeck fixes that. It's two cooperating pieces:
 
 - **Recorder** — a tiny stdlib-only hook script that Claude Code calls on
   every lifecycle event (prompt submitted, tool about to run, tool
@@ -20,31 +20,31 @@ zero effort after a one-time install. If the console isn't running, events
 still land in the log — the console just catches up on next launch, so
 nothing is ever lost.
 
-![Blackbox focused-mode cockpit: session sidebar, event timeline with tool durations, and a token/cost stats bar](docs/assets/cockpit.png)
+![AgentDeck focused-mode cockpit: session sidebar, event timeline with tool durations, and a token/cost stats bar](docs/assets/cockpit.png)
 
 ## Quickstart
 
 ```bash
-pipx install blackbox-cc     # or: pip install blackbox-cc
-blackbox install             # registers the recorder as a Claude Code hook
-blackbox                     # launch the live cockpit
+pipx install agentdeck     # or: pip install agentdeck
+agentdeck install          # registers the recorder as a Claude Code hook
+agentdeck                  # launch the live cockpit
 ```
 
-That's it — `blackbox install` is idempotent and additive (it merges into
+That's it — `agentdeck install` is idempotent and additive (it merges into
 `~/.claude/settings.json`, backing the file up first, and never touches
-hooks it didn't add). Run `blackbox doctor` any time to check that recording
+hooks it didn't add). Run `agentdeck doctor` any time to check that recording
 is actually working.
 
 ## Usage
 
 | Command | What it does |
 |---|---|
-| `blackbox` | Launch the live cockpit (default: focused mode) |
-| `blackbox install` / `uninstall` | Register / remove the recorder hook |
-| `blackbox doctor` | Check that recording is healthy |
-| `blackbox replay --session <id>` | Replay a past session |
-| `blackbox replay` | Browse past sessions, then replay one |
-| `blackbox export <session>` | Export a session to a self-contained HTML timeline |
+| `agentdeck` | Launch the live cockpit (default: focused mode) |
+| `agentdeck install` / `uninstall` | Register / remove the recorder hook |
+| `agentdeck doctor` | Check that recording is healthy |
+| `agentdeck replay --session <id>` | Replay a past session |
+| `agentdeck replay` | Browse past sessions, then replay one |
+| `agentdeck export <session>` | Export a session to a self-contained HTML timeline |
 
 ### View modes
 
@@ -57,14 +57,14 @@ is actually working.
 
 ### Other things you can do
 
-- **Install/uninstall the recorder** without hand-editing config — `blackbox install` merges hook entries into `~/.claude/settings.json` (backing the file up first) and never touches hooks it didn't add; `blackbox uninstall` reverses it cleanly.
-- **Check recording health** any time with `blackbox doctor` — confirms the hook is registered, the courier script runs, the log directory is writable, and reports how long ago the last event landed.
+- **Install/uninstall the recorder** without hand-editing config — `agentdeck install` merges hook entries into `~/.claude/settings.json` (backing the file up first) and never touches hooks it didn't add; `agentdeck uninstall` reverses it cleanly.
+- **Check recording health** any time with `agentdeck doctor` — confirms the hook is registered, the courier script runs, the log directory is writable, and reports how long ago the last event landed.
 - **Drill into any event** — `enter` on a timeline row opens the full pretty-printed payload (tool input/output, prompt text, etc.).
 - **Read the actual conversation** — `t` opens the chat transcript for the selected session, reconstructed from Claude Code's own transcript file.
 - **Search and filter** — `/` searches the current view (event text, file paths, commands); `e` shows errors only; number keys filter the firehose to a single session.
-- **Track spend** — per-turn and per-session token/cost estimates, backed by an editable pricing table in `~/.blackbox/config.toml`.
+- **Track spend** — per-turn and per-session token/cost estimates, backed by an editable pricing table in `~/.agentdeck/config.toml`.
 - **Get notified** — optional desktop notifications on long-running tool completion or `Notification` events, config-gated in `config.toml`.
-- **Export a session** — `blackbox export <session>` produces a single self-contained HTML timeline you can send to someone without them installing anything.
+- **Export a session** — `agentdeck export <session>` produces a single self-contained HTML timeline you can send to someone without them installing anything.
 - **Jump around fast** — `ctrl+k` opens a command palette to jump to a session, filter by event type, or change theme, without memorizing every key.
 - **Toggle light/dark theme** — `d`, for whichever terminal background you're on.
 
@@ -94,7 +94,7 @@ is actually working.
 A tiny stdlib-only script (`courier/emit.py`) is registered with Claude
 Code's hooks system. Every lifecycle event — prompt submitted, tool about to
 run, tool finished, session ended, subagent spawned, ... — gets appended as
-one JSON line to `~/.blackbox/sessions/<session_id>/main.jsonl` (or
+one JSON line to `~/.agentdeck/sessions/<session_id>/main.jsonl` (or
 `agent-<agent_id>.jsonl` for a subagent). The console tails that directory
 tree and renders the same data live; replay just reads it from the start
 instead.
@@ -102,24 +102,26 @@ instead.
 See `blackbox-design-doc.md` for the full design rationale, including why
 recording is file-per-actor rather than one shared log, how concurrent
 writes stay safe, and how tool-call pairing handles the async hook model.
+(That file predates the agentdeck rename and hasn't been updated to match —
+the architecture it describes is unchanged, only the names are stale.)
 
 ## Development
 
 ```bash
 uv sync --group dev
-uv run blackbox --version
+uv run agentdeck --version
 uv run pytest
 uv run ruff check .
 ```
 
 Config (pricing table, desktop notifications) lives in
-`~/.blackbox/config.toml`, created with sensible defaults on first run of
+`~/.agentdeck/config.toml`, created with sensible defaults on first run of
 the console — edit it directly.
 
 ## Publishing to PyPI
 
 This is for maintainers cutting a release, not for end users (who just run
-`pip install blackbox-cc`). The package builds with `hatchling`, driven by
+`pip install agentdeck`). The package builds with `hatchling`, driven by
 `pyproject.toml`, and ships via [uv](https://docs.astral.sh/uv/).
 
 1. **Bump the version** in `pyproject.toml` (`[project] version = "..."`,
@@ -135,8 +137,8 @@ This is for maintainers cutting a release, not for end users (who just run
    This produces a wheel and an sdist in `dist/`. Note the
    `[tool.hatch.build.targets.wheel.force-include]` entry in
    `pyproject.toml` — it copies `courier/emit.py` into
-   `blackbox/courier/emit.py` inside the wheel, since the courier script
-   lives outside `src/blackbox/` in the repo but still needs to ship
+   `agentdeck/courier/emit.py` inside the wheel, since the courier script
+   lives outside `src/agentdeck/` in the repo but still needs to ship
    inside the installed package. If you ever move the courier, update that
    mapping too.
 
@@ -148,12 +150,12 @@ This is for maintainers cutting a release, not for end users (who just run
    import zipfile, glob
    wheel = glob.glob('dist/*.whl')[0]
    with zipfile.ZipFile(wheel) as z:
-       assert 'blackbox/courier/emit.py' in z.namelist()
+       assert 'agentdeck/courier/emit.py' in z.namelist()
    print('OK:', wheel)
    "
 
    # install into a throwaway venv and smoke-test the CLI
-   uv run --with dist/*.whl --no-project -- blackbox --version
+   uv run --with dist/*.whl --no-project -- agentdeck --version
    ```
 
    (The CI workflow in `.github/workflows/ci.yml` already runs the
@@ -165,7 +167,7 @@ This is for maintainers cutting a release, not for end users (who just run
 
    ```bash
    uv publish --index testpypi --token <your-testpypi-token>
-   pip install --index-url https://test.pypi.org/simple/ blackbox-cc
+   pip install --index-url https://test.pypi.org/simple/ agentdeck
    ```
 
    `testpypi` needs a matching `[[tool.uv.index]]` entry in
@@ -179,7 +181,7 @@ This is for maintainers cutting a release, not for end users (who just run
    ```
 
    Generate the token from [pypi.org](https://pypi.org) → Account settings
-   → API tokens (scope it to the `blackbox-cc` project once the first
+   → API tokens (scope it to the `agentdeck` project once the first
    release exists). Set it as `UV_PUBLISH_TOKEN` in the environment to
    avoid passing it on the command line, or store it in
    `~/.config/uv/uv.toml`.
@@ -194,9 +196,9 @@ This is for maintainers cutting a release, not for end users (who just run
 Once published, anyone can install it with any of:
 
 ```bash
-pipx install blackbox-cc      # isolated, recommended for a CLI tool
-uv tool install blackbox-cc   # uv's equivalent of pipx
-pip install blackbox-cc       # into whatever environment is active
+pipx install agentdeck      # isolated, recommended for a CLI tool
+uv tool install agentdeck   # uv's equivalent of pipx
+pip install agentdeck       # into whatever environment is active
 ```
 
 **Automating this**: if you'd rather not run `uv publish` by hand each
