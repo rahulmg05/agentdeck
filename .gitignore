@@ -1,0 +1,33 @@
+# General
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+*design-doc.md
+
+# OS-specific
+.DS_Store
+
+# IDEs and Tools
+.claude/
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Test coverage & type checking
+.coverage
+htmlcov/
+coverage.xml
+.tox/
+.mypy_cache/
+
+# Logs
+*.log

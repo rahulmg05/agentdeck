@@ -1,0 +1,32 @@
+feat: initial commit of Blackbox flight recorder and TUI
+
+This commit introduces the complete Blackbox suite (blackbox-cc), providing 
+durable tracking and a live cockpit interface for Claude Code sessions.
+
+Key components and features included in this release:
+
+1. Core Architecture:
+  - Implements the "Courier" recorder script: A lightweight, stdlib-only 
+    hook that captures Claude Code lifecycle events (prompts, tool calls, 
+    subagents, token usage) and writes them durably to JSON logs.
+  - Implements the "Console" Textual TUI: A rich terminal interface that 
+    tails event logs and renders them live.
+
+2. TUI Dashboard Features:
+  - Live multi-session firehose and tiled wall view of active sessions.
+  - Focused per-session cockpit with real-time tool durations.
+  - Token spend and cost tracking visualizations.
+  - Session playback for replaying past interactions at variable speeds.
+
+3. CLI Application & Tooling (`blackbox`):
+  - `install`/`uninstall`: Idempotent management of Claude Code hooks in 
+    ~/.claude/settings.json.
+  - `doctor`: Diagnostic health check for the recording pipeline.
+  - `replay`: Interactive browsing and playback of historical sessions.
+  - `export`: Exports sessions to self-contained HTML timelines.
+
+4. Project Configuration:
+  - `pyproject.toml` set up with Hatchling build system.
+  - Dependencies pinned (Textual, Watchfiles).
+  - Dev dependencies configured (Pytest, Pytest-Asyncio, Ruff).
+  - Configured custom wheel build targets to properly package courier/emit.py.
