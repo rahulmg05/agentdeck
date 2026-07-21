@@ -127,7 +127,3 @@ Config (pricing table, desktop notifications) lives in
 `~/.agentdeck/config.toml`, created with sensible defaults on first run of
 the console — edit it directly.
 
-## License
-
-[MIT](LICENSE) — free to use, modify, and distribute, including
-commercially. Contributions are welcome via issues and pull requests.
